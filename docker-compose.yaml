@@ -1,0 +1,28 @@
+version: '3.1'
+
+services:
+  db:
+    container_name: db
+    image: mariadb
+    restart: always
+    volumes:
+      - mariadb:/var/lib/mysql
+      - ./scripts/db.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      MARIADB_ROOT_PASSWORD: mypassword
+    ports:
+      - "3306:3306"
+
+  app:
+    container_name: app
+    build:
+      context: ./app
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PASSWORD: ${DB_PASSWORD}
+      EXTERNAL_DB_HOST: ${HOST}
+    ports:
+      - "8080:8080"
+volumes:
+  mariadb:

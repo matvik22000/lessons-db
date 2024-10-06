@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>войти</title>
+    <script src="/url.js"></script>
+</head>
+<body>
+<h3>Вход</h3>
+<label>
+    Имя пользователя
+    <input id="login"/>
+</label>
+<label>
+    Пароль
+    <input id="pwd"/>
+</label>
+<button onclick="login()">ок</button>
+<br/>
+<a href="reg.html">Создать</a>
+<script>
+    function login() {
+        let username = document.getElementById("login")
+        let pwd = document.getElementById("pwd")
+        fetch(url_for("/login"), {
+                method: 'POST',
+                credentials: "include",
+                body: JSON.stringify(
+                    {
+                        username: username.value,
+                        password: pwd.value
+                    }
+                ),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        )
+            .then((res) => {
+                if (res.status === 200) {
+                    location.href = "/cabinet.html"
+                } else {
+                    alert("Ошибка")
+                }
+            })
+    }
+</script>
+</body>
+</html>

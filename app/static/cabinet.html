@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>База данных</title>
+    <script src="/url.js"></script>
+    <style>
+    </style>
+</head>
+<body>
+<button onclick="show_credentials()">Показать данные для подключения</button>
+<p id="creds">
+
+</p>
+<div id="tables">
+    <h2>Сброс таблиц</h2>
+    <h3>При нажатии на кнопку таблица будет приведена к исходному состоянию</h3>
+</div>
+<button style="margin-top: 2%" onclick="drop_all()">Сбросить все таблицы</button>
+<script>
+    const tables_div = document.getElementById("tables")
+
+    function format(data) {
+        return Object.keys(data).map((k) => k + ": " + data[k]).join("\n")
+
+    }
+
+    function show_credentials() {
+        fetch(url_for("/login"), {
+                method: 'POST',
+                credentials: "include",
+                body: JSON.stringify({use_cookie: true}),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        )
+            .then((res) => {
+                if (res.status !== 200) location.href = '/login.html'
+                return res.json()
+            })
+            .then((data) => document.getElementById("creds").innerText = format(data))
+    }
+
+    function tables_controls() {
+        const generate_table = (table) => {
+            let el = document.createElement("button")
+            el.innerText = "сбросить " + table
+            el.className = "table-ctrl-btn"
+            el.onclick = () => fetch(url_for("/recreate_table"), {
+                method: 'POST',
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    table: table
+                })
+            })
+                .then(res => alert("Получилось"))
+                .catch(res => alert("Ошибка"))
+            let res = document.createElement("p")
+            res.appendChild(el)
+            tables_div.appendChild(res)
+        }
+        fetch(url_for("/tables"), {
+                credentials: "include",
+            }
+        )
+            .then(res => res.json())
+            .then(data => {
+                const tables = data.tables
+                tables.map(generate_table)
+            })
+    }
+
+    function drop_all() {
+        fetch(url_for("/recreate_all_tables"), {
+                method: 'POST',
+                credentials: "include",
+            }
+        )
+            .then(res => alert("Получилось"))
+            .catch(res => alert("Ошибка"))
+    }
+
+    window.onload = () => {
+        fetch(url_for("/logged_in"), {
+                credentials: "include",
+            }
+        )
+            .then((res) => {
+                if (res.status !== 200) location.href = '/login.html'
+            })
+        tables_controls()
+    }
+</script>
+</body>
+</html>
